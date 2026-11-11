@@ -1,0 +1,15 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+akshare>=1.18
+pandas>=2.2
+pydantic>=2.7
+pydantic-settings>=2.3
+apscheduler>=3.10
+pyyaml>=6.0
+# 只为 `fastapi.testclient`（回归脚本 _sub_check 等）；应用代码 0 处 import。
+# **不能删** —— 删了所有走 TestClient 的回归全红。
+httpx>=0.27
+lark-oapi>=1.4  # 飞书长连接收指令（app/feishu.py）
+# 8 处直接 `import requests`（feishu/netfix/notify/fund_estimate/hk/live/quotes/
+# search）。原先靠 akshare 的传递依赖撑着 —— akshare 改版本就会悄悄掉。
+requests>=2.31

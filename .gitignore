@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# 本地数据（不入库）
+backend/data/market.db
+backend/data/*.db
+backend/data/trade_calendar.json
+
+# Node
+node_modules/
+frontend/dist/
+.vite/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+.local/
+
+# 一键启动的产物（日志 + PID 记录）
+run/
+
+# 参考项目（浅克隆，不参与构建）
+reference/
+
+# 环境变量
+.env
+.env.local
+
+# 私钥：**绝不入库**。这个文件是本机 HTTPS 自签用的 RSA 私钥，一旦进 git
+# 历史就再也拿不出来（除非重写全部提交），比删文件严重得多。
+*.pem
+
+# 第三方启动器的预编译产物（75 MB：StableDiffusion 启动器、aria2c、
+# micromamba、Vulkan 扩展包…）。与看板本体无关，不参与任何构建。
+.launcher/
+
+# 研究过程里的一次性探测脚本（C 盘排查期间手写的，不是看板本体，
+# 也不参与构建）。按名字精确匹配而不是 *.ps1 —— 将来真要往项目里加
+# PowerShell 脚本，不会被这条规则悄悄吞掉。
+/accesstest*.ps1
+/sysinfo*.ps1
+/vmcheck.ps1
+/winstate.ps1
+# 某次命令写歪留下的文件，名字就是一个等号
+/=

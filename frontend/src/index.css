@@ -1,0 +1,103 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f5f5f5;
+}
+
+/* 财经新闻列表：整行可点（键盘也能 Enter 打开详情） */
+.news-row {
+  cursor: pointer;
+  padding: 12px 8px;
+  border-radius: 8px;
+}
+
+.news-row:hover,
+.news-row:focus {
+  background: rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+/* 股票代码：点击用本机同花顺打开详情。
+   虚线下划线 + 主题蓝（#1677ff），刻意避开红绿涨跌色 */
+.stock-code {
+  cursor: pointer;
+  color: #1677ff;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(22, 119, 255, 0.45);
+}
+
+.stock-code:hover {
+  border-bottom-color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  border-radius: 4px;
+}
+
+/* 总览统计卡：整卡可点进明细，悬停给个蓝边提示「这是个入口」 */
+.stat-link {
+  display: block;
+  color: inherit;
+}
+
+.stat-link:hover .ant-card {
+  border-color: #1677ff;
+}
+
+.stat-link .ant-card {
+  transition: border-color 0.15s ease;
+}
+
+/* 定时任务页：测试发送后的飞书消息正文预览（纯文本，保留换行） */
+.notify-preview {
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px 10px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  background: #fafafa;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 涨停池的断板行：行情字段是断板那天的旧值，整行压灰，
+   免得被当成当天数据看。行仍可点进个股详情 —— 那个跳转跟日期无关 */
+.ant-table-tbody > tr.row-broken > td {
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.ant-table-tbody > tr.row-broken:hover > td {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* 侧栏收起角标：钉在系统名行的右上角，平时不抢眼，hover 才给底色。
+   刻意不用 antd Button —— 它 text 型的悬停底色是按浅色背景调的，
+   压在深色侧栏上等于没有反馈；这里直接给深色系的两档颜色。 */
+.sider-fold {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 13px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.sider-fold:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+}

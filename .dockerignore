@@ -1,0 +1,29 @@
+# 构建上下文是仓库根目录 —— 不排除这些，docker build 会把 2.9 万个 venv 文件
+# 和整个 node_modules 打包上传，慢到怀疑人生，还会把凭据塞进镜像层。
+
+# 前端整体不进上下文（dist 由部署包目录提供，不走 COPY frontend）
+frontend
+
+# Python 虚拟环境
+backend/.venv
+**/__pycache__
+**/*.pyc
+**/*.pyo
+
+# 数据绝不进镜像：market.db 里存着飞书 app_id / app_secret / owner
+backend/data
+
+# 本地运行产物、日志、临时脚本
+run
+**/*.log
+scripts/__pycache__
+reference
+docs
+*.md
+
+# 版本库与编辑器垃圾
+.git
+.gitignore
+.idea
+.vscode
+=
