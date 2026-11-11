@@ -18,6 +18,7 @@ import {
   ControlOutlined,
   ExperimentOutlined,
   FundOutlined,
+  HistoryOutlined,
   LineChartOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -39,6 +40,7 @@ import LimitPools from './pages/LimitPools'
 import MainForce from './pages/MainForce'
 import News from './pages/News'
 import Overview from './pages/Overview'
+import Replenish from './pages/Replenish'
 import SectorFlow from './pages/SectorFlow'
 import StockDetail from './pages/StockDetail'
 import Subs from './pages/Subs'
@@ -110,6 +112,7 @@ const ITEMS: MenuProps['items'] = [
     icon: <CrownOutlined />,
     label: <NavLink to="/subs">订阅管理</NavLink>,
   },
+  { key: '/replenish', icon: <HistoryOutlined />, label: <NavLink to="/replenish">历史补录</NavLink> },
   { key: '/data', icon: <DatabaseOutlined />, label: <NavLink to="/data">数据管理</NavLink> },
 ]
 
@@ -244,6 +247,7 @@ export default function App() {
             <Route path="/subs" element={<Subs />} />
             {/* 数据管理：看占用 + 按数据集删除 + 清残留 + VACUUM + 清日志。
                 删除默认 dry_run，真删要后端两道门（dry_run=false + confirm）。 */}
+            <Route path="/replenish" element={<Replenish />} />
             <Route path="/data" element={<DataManage />} />
             {/* 个股详情：总览卡片/连板梯队点进来的落点 */}
             <Route path="/stock/:code" element={<StockDetail />} />

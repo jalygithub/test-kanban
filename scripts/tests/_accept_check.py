@@ -424,7 +424,10 @@ _NET_ATTR = {"backfill", "with_retry", "run_retries", "run_post_close",
              # 前5跟踪（2026-11-11）：`top5track.pull` 是盘后那一步的联网取价。
              # 端点只准调零联网的 `top5track.roster` —— 先把 pull 这个属性名
              # 进判据，哪天有人在路由里调它，B1 的「全集 == 白名单」当场红。
-             "pull"}
+             "pull",
+             # 历史补录（2026-11-11）：`replenish.run_replenish` 是四个补录 job
+             # 的触发口（日线/资金流/池子/打分，全部联网）。
+             "run_replenish"}
 _SAFE_ATTR = {"plan", "load_scope", "coverage_report", "gaps",
               "BACKFILLABLE", "REFUSED", "items"}
 _NET_ROOT = {"requests", "akshare", "netfix", "httpx", "urllib"}
@@ -440,6 +443,10 @@ _NET_ROOT = {"requests", "akshare", "netfix", "httpx", "urllib"}
 #     白名单外；现在走 `scheduler.score_and_capture`。
 # 同日再加第 9 条：`/pipeline/tasks/{task_id}` 是阶段 3 六个任务的唯一触发口，
 #   其中四个会联网。GET `/pipeline/tasks` **不在**这里 —— 它只读 job_run。
+# 2026-11-11 加第 10 条：`/replenish/start` 是「历史补录」页四个补录 job 的
+#   触发口（日线全历史 / 资金流全历史 / 池子补采 / 历史打分），全部联网且
+#   是几百到上万次请求量级；`/replenish/status`·`/replenish/stop` 不在
+#   这里 —— 前者只读内存状态，后者只置停止标记。
 DATA_SRC_NET = {
     "/jobs/run",                          # 盘后任务（含采集）
     "/limit",                             # 实时涨停池
@@ -450,6 +457,7 @@ DATA_SRC_NET = {
     "/pipeline/collect/retry",            # 补跑重试
     "/pipeline/backfill",                 # 历史回填
     "/pipeline/tasks/{task_id}",          # 六个每日任务的统一触发口（阶段 3）
+    "/replenish/start",                   # 历史补录四个 job 的触发口（2026-11-11）
 }
 
 

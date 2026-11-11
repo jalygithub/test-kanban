@@ -1698,6 +1698,31 @@ export interface BackfillRunResult {
   adjust: string | null
 }
 
+// ---- 历史补录（/replenish 页，2026-11-11）------------------------------
+
+export type ReplenishJob = 'bars' | 'inflow' | 'pools' | 'score'
+
+export interface ReplenishJobState {
+  running: boolean
+  error: string
+  started_at: string
+  finished_at: string
+  /** 本轮总单元数（只 / 天×4 池 / 交易日） */
+  total: number
+  done: number
+  /** 真正新落库的行数 */
+  rows: number
+  failed: number
+  /** 跳过/失败样本（前 100 条），每条带原因 */
+  skipped: { key: string; reason: string }[]
+  msg: string
+}
+
+export interface ReplenishStatus {
+  active: ReplenishJob | null
+  jobs: Record<ReplenishJob, ReplenishJobState>
+}
+
 // ---------------------------------------------------------------- 接口
 
 // ---- 自动买卖策略 V1（模拟盘，docs/ai_trading_lab/）-------------------------
@@ -2367,6 +2392,28 @@ export const api = {
     request<BackfillRunResult>('/api/pipeline/backfill', {
       method: 'POST',
       body: JSON.stringify({ domain: 'daily_bar', items: [code], start, end, only_gaps: true }),
+    }),
+
+  /**
+   * 历史补录四个 job 的状态。**零联网** —— 只读内存状态字典。
+   */
+  replenishStatus: () => request<ReplenishStatus>('/api/replenish/status'),
+
+  /**
+   * ⚠️ **会联网**，且是几百到上万次请求量级。只在「历史补录」页的人点按钮
+   * 时调 —— 启动、页面刷新、任何定时器都不碰它。断点续跑：原样再点一次就是续跑。
+   */
+  replenishStart: (job: ReplenishJob, start?: string, end?: string) =>
+    request<{ status: string; job: ReplenishJob; start: string; end: string }>(
+      '/api/replenish/start',
+      { method: 'POST', body: JSON.stringify({ job, start, end }) },
+    ),
+
+  /** 优雅停止（票/批边界退出，已落库的都保留）；停没在跑的 job 是无害操作。 */
+  replenishStop: (job: ReplenishJob) =>
+    request<{ stop_requested: boolean; job: ReplenishJob }>('/api/replenish/stop', {
+      method: 'POST',
+      body: JSON.stringify({ job }),
     }),
 
   /**

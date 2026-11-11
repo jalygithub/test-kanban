@@ -36,6 +36,7 @@ from app.metrics import fund_review as freview
 from app.pipeline import backfill
 from app.pipeline import coverage as pipeline_coverage
 from app.pipeline import ingest as jobstate
+from app.pipeline import replenish
 from app.pipeline import tasks as tasksvc
 from app.pipeline import top5track
 from app.research import engine
@@ -2916,6 +2917,46 @@ def pipeline_backfill(payload: Dict[str, Any]) -> Dict[str, Any]:
         logger.error("回填失败 %s: %s", domain, exc, exc_info=True)
         raise HTTPException(
             500, f"回填失败: {type(exc).__name__}: {exc}") from exc
+
+
+# ------------------------------------------------------------ 历史补录
+
+
+class ReplenishBody(BaseModel):
+    job: str = Field(..., description="bars / inflow / pools / score")
+    start: Optional[str] = Field(None, description="起始日 YYYYMMDD，缺省 20260101")
+    end: Optional[str] = Field(None, description="结束日 YYYYMMDD，缺省最新交易日")
+
+
+@router.get("/replenish/status")
+def replenish_status() -> Dict[str, Any]:
+    """历史补录四个 job 的状态。**零联网** —— 只读内存状态字典。"""
+    return {"jobs": replenish.snapshot(), "active": replenish.active_job()}
+
+
+@router.post("/replenish/start")
+def replenish_start(body: ReplenishBody) -> Dict[str, Any]:
+    """起一个补录 job（后台守护线程），立即返回。
+
+    ⚠️ **本端点会联网**，且是几百到上万次请求量级 —— 只在人点「历史补录」
+    页的按钮时调。服务启动、页面刷新、任何定时器都不碰它（同
+    `/pipeline/backfill` 一条纪律）。断点续跑：原样再点一次就是续跑。
+    """
+    try:
+        return replenish.run_replenish(body.job, body.start, body.end)
+    except replenish.Busy as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/replenish/stop")
+def replenish_stop(body: ReplenishBody) -> Dict[str, Any]:
+    """请求优雅停止某个补录 job（票/批边界退出，已落库的都保留）。"""
+    try:
+        return replenish.stop(body.job)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 # ----------------------------------------------------------------- 内部
