@@ -9,6 +9,8 @@ venv/
 backend/data/market.db
 backend/data/*.db
 backend/data/trade_calendar.json
+backend/data/*.log
+backend/data/backfill_progress.json
 
 # Node
 node_modules/
