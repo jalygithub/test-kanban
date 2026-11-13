@@ -3,8 +3,10 @@
 
 ## 与 daily 策略（service.py）的区别
 
-- **数据**：daily 走本地日线、零联网；本模块**联网取实时价**（`fetchers.live`，
-  腾讯批量、约 5 秒延迟），因为「实时选股/实时盯盘」离了现价无从谈起。
+- **数据**：daily 走本地日线、零联网；本模块**联网取实时价**（akshare
+  `stock_zh_a_spot_tx` 腾讯源、全市场快照带 TTL 缓存），因为「实时选股/实时盯盘」
+  离了现价无从谈起。东财 `stock_zh_a_spot_em` 字段最全但建连被安全设备 RST
+  不可用，故走腾讯源（理由见 `_ak_snapshot` 文档）。
 - **成交**：daily 是 D+1 开盘撮合；本模块**按现价即时纸面成交**。
 - **账户**：daily 用 `sim_account`；本模块用 `live_account`（各自独立，语义不同）。
 - **规则**：daily 的规则硬编码在 strategy.py；本模块的规则是**数据**
@@ -23,7 +25,8 @@
 
 ## 诚实边界
 
-- 实时报价字段过 `live.py` 的不变量校验，拿不到就 None，**绝不显示猜出来的数**。
+- 实时报价字段经不变量校验（成交额≈成交量×价格）确认单位，拿不到就 None，
+  **绝不显示猜出来的数**。
 - 不是真实下单，全部纸面；不构成投资建议。
 """
 
@@ -35,7 +38,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from app.fetchers import live as live_fetch
+import akshare as ak
 from app.pipeline import ingest  # 风险状态（沿用 daily 口径）
 from app.store import db
 from app.trading import params as pmod
@@ -101,6 +104,90 @@ def _today() -> str:
 
 
 _HIST = _HistCache()
+
+
+# --------------------------------------------------------------- akshare 实时
+_SPOT_CACHE: Dict[str, Any] = {"ts": 0.0, "rows": None}
+_SPOT_TTL = 15.0  # 全市场快照缓存秒数
+
+
+def _ak_snapshot() -> List[Dict[str, Any]]:
+    """全市场实时快照（akshare 腾讯源 `stock_zh_a_spot_tx`），带 TTL 缓存。
+
+    为什么用腾讯源 + 为什么缓存：
+    - 东财 `stock_zh_a_spot_em` 字段最全但**建连被安全设备 RST**（实测
+      `RemoteDisconnected`），不可用。
+    - akshare 的实时接口是「全市场」（`stock_zh_a_spot_tx` 内部分页拉全市场）或
+      「逐只」，**没有** `live.py` 裸腾讯那种「几十只一批一次拉完」的批量接口。
+      每 tick 都拉全市场太重 → 按 TTL 缓存复用，tick 只做内存过滤。
+
+    字段单位经不变量校验（成交额≈成交量×价格，实测比值 0.993，非猜测）：
+      turnover = 成交额(万元) → amount(元) = turnover×10000
+      volume   = 成交量(手)   → volume(股) = volume×100
+    """
+    import time as _t
+    now = _t.monotonic()
+    if _SPOT_CACHE["rows"] is None or now - float(_SPOT_CACHE["ts"]) > _SPOT_TTL:
+        df = ak.stock_zh_a_spot_tx()
+        _SPOT_CACHE["rows"] = df.to_dict("records")
+        _SPOT_CACHE["ts"] = now
+    return _SPOT_CACHE["rows"] or []
+
+
+def _ak_quotes(universe: List[Dict[str, Any]]
+               ) -> Tuple[List[Dict[str, Any]], List[str]]:
+    """取宇宙内各票实时价（akshare）。返回 (rows, warns)，字段对齐 `live.quotes`。
+
+    code 归一：akshare 腾讯源 code 形如 `sh600519`，取后 6 位对齐本项目 6 位码。
+    拿不到的票置 None 并记 warn（不猜价）。腾讯全市场快照无当日最高/最低/今开
+    → 置 None（不影响规则：止损/趋势用现价+历史 MA，突破用历史 N 日高）。"""
+    warns: List[str] = []
+    try:
+        snap = _ak_snapshot()
+    except Exception as exc:  # noqa: BLE001
+        return [], ["akshare 实时快照获取失败：%s" % exc]
+    idx: Dict[str, Dict[str, Any]] = {}
+    for rec in snap:
+        c6 = str(rec.get("code") or "")[-6:]
+        if c6:
+            idx[c6] = rec
+
+    def _f(v: Any) -> Optional[float]:
+        try:
+            x = float(v)
+        except (TypeError, ValueError):
+            return None
+        return x if x == x else None  # NaN → None
+
+    rows: List[Dict[str, Any]] = []
+    for u in universe:
+        code = str(u["code"])
+        rec = idx.get(code)
+        if rec is None:
+            warns.append("%s 无实时报价" % code)
+            rows.append({"code": code, "name": u.get("name"), "price": None,
+                         "pct": None, "amount": None, "volume": None,
+                         "high": None, "low": None, "open": None,
+                         "prev_close": None, "updated_at": None})
+            continue
+        price = _f(rec.get("zxj"))
+        zd = _f(rec.get("zd"))
+        turn = _f(rec.get("turnover"))
+        vol = _f(rec.get("volume"))
+        rows.append({
+            "code": code, "name": rec.get("name") or u.get("name"),
+            "price": price,
+            "pct": _f(rec.get("zdf")),
+            "change": zd,
+            "prev_close": (price - zd)
+            if (price is not None and zd is not None) else None,
+            "amount": (turn * 10000) if turn is not None else None,
+            "volume": (vol * 100) if vol is not None else None,
+            "high": None, "low": None, "open": None,  # 腾讯快照无此三项，不猜
+            "turnover_rate": _f(rec.get("hsl")), "pe": _f(rec.get("pe_ttm")),
+            "updated_at": None,
+        })
+    return rows, warns
 
 
 # --------------------------------------------------------------- 指标计算
@@ -265,7 +352,7 @@ def tick() -> Dict[str, Any]:
                 universe.append({"code": c, "name": pos_map[c].get("name")})
 
         # ---- 2) 取实时价（联网，带熔断/校验）----
-        quotes, warns = live_fetch.quotes(universe)
+        quotes, warns = _ak_quotes(universe)
         qmap = {str(q.get("code")): q for q in quotes}
 
         # ---- 3) 风险状态（沿用 daily 口径）----
