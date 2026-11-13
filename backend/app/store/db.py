@@ -504,6 +504,53 @@ CREATE TABLE IF NOT EXISTS sim_position (
     entry_date  TEXT NOT NULL,
     updated_at  TEXT NOT NULL
 );
+-- ==== 实时纸面自动交易（rules.py 规则引擎 + live_loop.py 实时循环）==========
+-- 规则实例：id 主键，params JSON。整套规则版本 = rules.rules_version()。
+CREATE TABLE IF NOT EXISTS trading_rule (
+    id          TEXT PRIMARY KEY,
+    category    TEXT NOT NULL,            -- filter / exit
+    type        TEXT NOT NULL,            -- rules.py 注册表里的类型键
+    name        TEXT NOT NULL,
+    enabled     INTEGER NOT NULL DEFAULT 1,
+    order_n     INTEGER NOT NULL DEFAULT 0,
+    params      TEXT NOT NULL,            -- JSON
+    updated_at  TEXT NOT NULL
+);
+-- 实时纸面账户单行 (id=1)。与 daily 策略的 sim_account **分开**：实时按现价
+-- 即时成交，daily 是 D+1 开盘撮合，记账语义不同，不混用一个账户。
+CREATE TABLE IF NOT EXISTS live_account (
+    id            INTEGER PRIMARY KEY CHECK (id = 1),
+    cash          REAL NOT NULL,
+    initial_cash  REAL NOT NULL,
+    realized_pnl  REAL NOT NULL DEFAULT 0,
+    updated_at    TEXT NOT NULL
+);
+-- 实时纸面持仓。peak_price = 入场以来最高价（移动止盈基准）。
+CREATE TABLE IF NOT EXISTS live_position (
+    code        TEXT PRIMARY KEY,
+    name        TEXT,
+    qty         INTEGER NOT NULL,
+    avg_cost    REAL NOT NULL,
+    peak_price  REAL,
+    entry_ts    TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+-- 实时纸面成交流水。每笔买卖落一行，页面「今日交易」直接查这里。
+CREATE TABLE IF NOT EXISTS live_trade (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts        TEXT NOT NULL,
+    code      TEXT NOT NULL,
+    name      TEXT,
+    side      TEXT NOT NULL,            -- BUY / SELL
+    qty       INTEGER NOT NULL,
+    price     REAL NOT NULL,
+    amount    REAL NOT NULL,
+    fee       REAL NOT NULL,
+    pnl       REAL,                     -- 卖出实现盈亏（买入为 NULL）
+    rule      TEXT,                     -- 触发规则名
+    note      TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_live_trade_ts ON live_trade(ts);
 """
 
 
@@ -3408,3 +3455,159 @@ def bars_window_dates(table: str, since: str, until: str) -> List[str]:
             f" WHERE trade_date >= ? AND trade_date <= ? ORDER BY trade_date",
             (str(since), str(until))).fetchall()
     return [str(r[0]) for r in rows]
+
+
+# ==== 实时纸面自动交易：规则存取 + 账户/持仓/流水（rules.py + live_loop.py）====
+
+def trading_rules_list() -> List[Dict[str, Any]]:
+    """全部规则行（params JSON 解析成 dict），按 (category, order_n, id) 稳定序。"""
+    with _lock:
+        conn = _connect()
+        rows = conn.execute(
+            "SELECT * FROM trading_rule ORDER BY category, order_n, id"
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["enabled"] = bool(d.get("enabled"))
+        d["order"] = int(d.get("order_n") or 0)
+        try:
+            d["params"] = json.loads(d.get("params") or "{}")
+        except (TypeError, ValueError):
+            d["params"] = {}
+        out.append(d)
+    return out
+
+
+def trading_rules_save(rules: Sequence[Dict[str, Any]]) -> None:
+    """整套替换（调用方已用 rules.normalize_rules 校验过）。单事务原子。"""
+    now = _trade_now()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute("DELETE FROM trading_rule")
+            for r in rules:
+                conn.execute(
+                    "INSERT INTO trading_rule(id, category, type, name, enabled,"
+                    " order_n, params, updated_at) VALUES (?,?,?,?,?,?,?,?)",
+                    (str(r["id"]), str(r["category"]), str(r["type"]),
+                     str(r["name"]), 1 if r.get("enabled") else 0,
+                     int(r.get("order", 0)),
+                     json.dumps(r.get("params") or {}, ensure_ascii=False),
+                     now))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+
+def trading_rules_count() -> int:
+    with _lock:
+        conn = _connect()
+        row = conn.execute("SELECT COUNT(*) FROM trading_rule").fetchone()
+    return int(row[0]) if row else 0
+
+
+# ---- 实时纸面账户 ----
+def live_account_get() -> Optional[Dict[str, Any]]:
+    with _lock:
+        conn = _connect()
+        row = conn.execute("SELECT * FROM live_account WHERE id=1").fetchone()
+    return dict(row) if row else None
+
+
+def live_account_init(initial_cash: float) -> Dict[str, Any]:
+    now = _trade_now()
+    with _lock:
+        conn = _connect()
+        conn.execute(
+            "INSERT INTO live_account(id, cash, initial_cash, realized_pnl,"
+            " updated_at) VALUES (1,?,?,0,?) ON CONFLICT(id) DO NOTHING",
+            (float(initial_cash), float(initial_cash), now))
+        conn.commit()
+        row = conn.execute("SELECT * FROM live_account WHERE id=1").fetchone()
+    return dict(row)
+
+
+# ---- 实时纸面持仓 ----
+def live_positions_list() -> List[Dict[str, Any]]:
+    with _lock:
+        conn = _connect()
+        rows = conn.execute(
+            "SELECT * FROM live_position ORDER BY code").fetchall()
+    return [dict(r) for r in rows]
+
+
+def live_position_get(code: str) -> Optional[Dict[str, Any]]:
+    with _lock:
+        conn = _connect()
+        row = conn.execute("SELECT * FROM live_position WHERE code=?",
+                           (str(code),)).fetchone()
+    return dict(row) if row else None
+
+
+# ---- 实时成交流水 ----
+def live_trades_between(start_ts: str, end_ts: str) -> List[Dict[str, Any]]:
+    with _lock:
+        conn = _connect()
+        rows = conn.execute(
+            "SELECT * FROM live_trade WHERE ts >= ? AND ts <= ? ORDER BY ts",
+            (str(start_ts), str(end_ts))).fetchall()
+    return [dict(r) for r in rows]
+
+
+def live_trades_recent(limit: int = 50) -> List[Dict[str, Any]]:
+    with _lock:
+        conn = _connect()
+        rows = conn.execute(
+            "SELECT * FROM live_trade ORDER BY ts DESC LIMIT ?",
+            (int(limit),)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def live_fill(ts: str, code: str, name: Optional[str], side: str, qty: int,
+              price: float, fee: float, pnl: Optional[float],
+              rule: Optional[str], note: Optional[str],
+              cash_delta: float, position: Optional[Dict[str, Any]]) -> int:
+    """实时成交原子记账：流水 + 账户 + 持仓三写一次提交。
+
+    ``position`` 为 None 表示卖出后清仓（删持仓行）；dict 为新持仓（upsert，
+    qty<=0 自动删）。现金更新命中 0 行 = 账户未初始化，抛错不静默（同 sim_settle）。
+    """
+    now = _trade_now()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "UPDATE live_account SET cash = cash + ?,"
+                " realized_pnl = realized_pnl + ?, updated_at=? WHERE id=1",
+                (float(cash_delta), float(pnl or 0.0), now))
+            if cur.rowcount != 1:
+                raise RuntimeError("live_account 未初始化，成交记账中止")
+            conn.execute(
+                "INSERT INTO live_trade(ts, code, name, side, qty, price,"
+                " amount, fee, pnl, rule, note) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (str(ts), str(code), name, str(side), int(qty), float(price),
+                 float(qty) * float(price), float(fee), pnl, rule, note))
+            if position is not None:
+                if int(position.get("qty") or 0) <= 0:
+                    conn.execute("DELETE FROM live_position WHERE code=?",
+                                 (str(code),))
+                else:
+                    conn.execute(
+                        "INSERT INTO live_position(code, name, qty, avg_cost,"
+                        " peak_price, entry_ts, updated_at) VALUES (?,?,?,?,?,?,?)"
+                        " ON CONFLICT(code) DO UPDATE SET name=excluded.name,"
+                        " qty=excluded.qty, avg_cost=excluded.avg_cost,"
+                        " peak_price=excluded.peak_price,"
+                        " updated_at=excluded.updated_at",
+                        (str(code), position.get("name"),
+                         int(position.get("qty") or 0),
+                         float(position.get("avg_cost") or 0.0),
+                         position.get("peak_price"),
+                         str(position.get("entry_ts") or now), now))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+    return 1

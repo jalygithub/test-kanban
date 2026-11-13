@@ -1862,6 +1862,96 @@ export interface TradingParams {
  */
 export const BACKFILL_BASE_START = '20250801'
 
+export interface TradingRuleParamSpec {
+  type: 'int' | 'float' | 'bool'
+  default: number | boolean
+  min?: number
+  max?: number
+  label: string
+}
+export interface TradingRuleType {
+  label: string
+  desc: string
+  params: Record<string, TradingRuleParamSpec>
+}
+export interface TradingRule {
+  id: string
+  category: 'filter' | 'exit'
+  type: string
+  name: string
+  enabled: boolean
+  order: number
+  params: Record<string, number | boolean>
+}
+export interface TradingRulesPayload {
+  rules: TradingRule[]
+  types: { filter: Record<string, TradingRuleType>; exit: Record<string, TradingRuleType> }
+  version: string
+}
+export interface TradingLiveTrade {
+  ts: string
+  code: string
+  name?: string | null
+  side: 'BUY' | 'SELL'
+  qty: number
+  price: number
+  amount: number
+  fee: number
+  pnl?: number | null
+  rule?: string | null
+  detail?: string | null
+  note?: string | null
+}
+export interface TradingFunnelStage {
+  rule_id: string
+  name: string
+  type: string
+  passed_n: number
+  blocked_n: number
+  detail0?: string
+}
+export interface TradingWatchItem {
+  code: string
+  name?: string | null
+  price: number
+  notes: string[]
+}
+export interface TradingLivePosition {
+  code: string
+  name?: string | null
+  qty: number
+  avg_cost: number
+  peak_price?: number | null
+  entry_ts: string
+  price: number
+  market_value: number
+  pnl: number
+}
+export interface TradingLiveAccount {
+  cash: number
+  initial_cash: number
+  realized_pnl: number
+  position_value: number
+  equity: number
+  total_pnl: number
+}
+export interface TradingLiveState {
+  running: boolean
+  interval: number
+  scheduled: boolean
+  in_session: boolean
+  last_tick?: string | null
+  last_error?: string | null
+  tick_count: number
+  funnel: TradingFunnelStage[]
+  buys: TradingLiveTrade[]
+  sells: TradingLiveTrade[]
+  watch: TradingWatchItem[]
+  warns: string[]
+  account?: TradingLiveAccount | null
+  positions: TradingLivePosition[]
+}
+
 export const api = {
   limitPool: (type: PoolType, date?: string, refresh = false) => {
     const q = new URLSearchParams({ type })
@@ -2623,4 +2713,36 @@ export const api = {
 
   /** 参数默认值与版本口径 —— 页面只读展示，与后端同一份事实 */
   tradingParams: () => request<TradingParams>('/api/trading/params'),
+
+  // ==== 实时纸面自动交易（rules.py + live_loop.py）====
+  /** 全部规则 + 可选类型 + 版本号 */
+  tradingRulesGet: () => request<TradingRulesPayload>('/api/trading/rules'),
+  /** 整套替换（增删改后一次性提交）；未知类型/参数/越界 → 400 */
+  tradingRulesPut: (rules: TradingRule[]) =>
+    request<TradingRulesPayload>('/api/trading/rules', {
+      method: 'PUT',
+      body: JSON.stringify({ rules }),
+    }),
+  /** 恢复出厂默认规则 */
+  tradingRulesReset: () =>
+    request<TradingRulesPayload>('/api/trading/rules/reset', { method: 'POST' }),
+
+  /** 启动实时循环（后台线程） */
+  tradingLiveStart: (body: { interval?: number; scheduled?: boolean } = {}) =>
+    request<TradingLiveState>('/api/trading/live/start', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  tradingLiveStop: () =>
+    request<TradingLiveState>('/api/trading/live/stop', { method: 'POST' }),
+  /** 手动跑一轮（不启动循环） */
+  tradingLiveTick: () =>
+    request<TradingLiveState>('/api/trading/live/tick', { method: 'POST' }),
+  /** 面板状态：账户/持仓（带浮盈）/漏斗/买卖/重点观察 */
+  tradingLiveState: () => request<TradingLiveState>('/api/trading/live/state'),
+  tradingLiveTrades: (date?: string) =>
+    request<{ date: string; items: TradingLiveTrade[] }>(
+      `/api/trading/live/trades${date ? `?date=${date}` : ''}`),
+  tradingLiveReset: () =>
+    request<TradingLiveState>('/api/trading/live/reset', { method: 'POST' }),
 }

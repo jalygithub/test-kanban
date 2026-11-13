@@ -43,6 +43,8 @@ from app.research import engine
 from app.research.audit import BacktestDataAuditService
 from app.store import db, logs
 from app.trading import service as tradingsvc
+from app.trading import live_loop as tradelive
+from app.trading import rules as traderules
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api")
@@ -3066,3 +3068,104 @@ def trading_orders(limit: int = Query(50, ge=1, le=200)) -> Dict[str, Any]:
 def trading_params() -> Dict[str, Any]:
     """默认参数 + 版本口径（与页面表单同一份事实）。"""
     return tradingsvc.params_info()
+
+
+# ==== 实时纸面自动交易：规则管理 + 实时循环控制（rules.py + live_loop.py）====
+
+class TradingRulesBody(BaseModel):
+    rules: List[Dict[str, Any]] = Field(
+        default_factory=list, description="整套规则（前端增删改后整体提交）")
+
+
+class TradingLiveStartBody(BaseModel):
+    interval: Optional[float] = Field(None, ge=1.0, le=300.0,
+                                      description="轮询间隔秒；缺省沿用当前")
+    scheduled: Optional[bool] = Field(
+        None, description="true=只在盘中下单（定时触发）；false=每轮都可下单")
+
+
+def _rules_payload() -> Dict[str, Any]:
+    rows = db.trading_rules_list()
+    if not rows:
+        rows = traderules.normalize_rules(None)
+        db.trading_rules_save(rows)
+    return {"rules": rows,
+            "types": {"filter": traderules.type_registry("filter"),
+                      "exit": traderules.type_registry("exit")},
+            "version": traderules.rules_version(rows)}
+
+
+@router.get("/trading/rules")
+def trading_rules_get() -> Dict[str, Any]:
+    """全部规则 + 可选规则类型（新增规则下拉）+ 版本号。"""
+    return _rules_payload()
+
+
+@router.put("/trading/rules")
+def trading_rules_put(body: TradingRulesBody) -> Dict[str, Any]:
+    """整套替换（前端本地增删改后一次性提交）；未知类型/参数/越界 → 400。"""
+    try:
+        norm = traderules.normalize_rules(body.rules or None)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    db.trading_rules_save(norm)
+    return _rules_payload()
+
+
+@router.post("/trading/rules/reset")
+def trading_rules_reset() -> Dict[str, Any]:
+    """恢复出厂默认规则。"""
+    db.trading_rules_save(traderules.normalize_rules(None))
+    return _rules_payload()
+
+
+# ---- 实时循环控制 ----
+@router.post("/trading/live/start")
+def trading_live_start(body: TradingLiveStartBody = TradingLiveStartBody()
+                       ) -> Dict[str, Any]:
+    """启动实时循环（后台线程）。interval=轮询秒，scheduled=只盘中下单。"""
+    return tradelive.start(body.interval, body.scheduled)
+
+
+@router.post("/trading/live/stop")
+def trading_live_stop() -> Dict[str, Any]:
+    return tradelive.stop()
+
+
+@router.post("/trading/live/tick")
+def trading_live_tick() -> Dict[str, Any]:
+    """手动跑一轮（不启动循环）。"""
+    try:
+        return tradelive.tick()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(500, "tick 失败：%s" % exc) from exc
+
+
+@router.get("/trading/live/state")
+def trading_live_state() -> Dict[str, Any]:
+    """面板状态：账户/持仓（带浮动盈亏）/选股漏斗/本轮买卖/重点观察。"""
+    return tradelive.state()
+
+
+@router.get("/trading/live/trades")
+def trading_live_trades(
+        date: Optional[str] = Query(None, pattern=r"^\d{8}$",
+                                   description="YYYYMMDD；缺省今日"),
+        limit: int = Query(200, ge=1, le=1000)) -> Dict[str, Any]:
+    """成交流水（默认今日；date 指定某日 YYYYMMDD）。"""
+    rows = db.live_trades_recent(limit)
+    want = date or datetime.now().strftime("%Y%m%d")
+
+    def _day(iso: str) -> str:
+        try:
+            return datetime.fromisoformat(str(iso)).astimezone().strftime("%Y%m%d")
+        except (TypeError, ValueError):
+            return str(iso)[:10].replace("-", "")
+
+    return {"date": want, "items": [r for r in rows if _day(r.get("ts")) == want]}
+
+
+@router.post("/trading/live/reset")
+def trading_live_reset() -> Dict[str, Any]:
+    """重置面板内存状态（不动库里账户/持仓/流水）。"""
+    return tradelive.reset()
