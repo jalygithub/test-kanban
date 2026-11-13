@@ -373,17 +373,35 @@ export default function Jobs() {
   ]
 
   return (
-    <Card
-      title="定时任务"
-      extra={
+    <Space orientation="vertical" style={{ width: '100%' }} size={16}>
+      {/* 页头：原外层 Card 的 title/extra 上移为页头行，下面四张功能卡平铺 ——
+          卡中卡的双重边框是这页最重的视觉噪音，管理后台应是「页头 + 内容卡」。 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          flexWrap: 'wrap',
+          width: '100%',
+        }}
+      >
+        <div>
+          <Text strong style={{ fontSize: 16, lineHeight: '24px' }}>
+            定时任务
+          </Text>
+          <div>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              开关调度 · 手动触发 · 运行历史
+            </Text>
+          </div>
+        </div>
         <Button size="small" onClick={() => void refresh()} loading={loading}>
           刷新
         </Button>
-      }
-    >
-      {error && (
-        <Alert type="error" showIcon title={error} style={{ marginBottom: 12 }} />
-      )}
+      </div>
+
+      {error && <Alert type="error" showIcon title={error} />}
 
       {/* ---- 两个开关：盘后任务 / 估值推送，各自独立（2026-10-12）---- */}
       <Card
@@ -400,44 +418,49 @@ export default function Jobs() {
           </Space>
         }
         extra={
-          <Space wrap>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {schedule?.enabled
-                ? `盘后 ${String(schedule.hour).padStart(2, '0')}:${String(
-                    schedule.minute,
-                  ).padStart(2, '0')} · 下次 ${rel(schedule.next_run, now)}`
-                : '盘后不会自动抓数打分'}
-            </Text>
-            <Switch
-              checked={!!schedule?.enabled}
-              loading={toggling === 'jobs'}
-              checkedChildren="开"
-              unCheckedChildren="关"
-              onChange={(v) => void toggle({ enabled: v })}
-            />
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {schedule?.push_enabled
-                ? `推送 ${String(schedule.push_hour ?? 14).padStart(2, '0')}:${String(
-                    schedule.push_minute ?? 50,
-                  ).padStart(2, '0')} · 下次 ${rel(schedule.next_push, now)}`
-                : '不会自动推送估值'}
-            </Text>
-            <Switch
-              checked={!!schedule?.push_enabled}
-              loading={toggling === 'push'}
-              checkedChildren="开"
-              unCheckedChildren="关"
-              onChange={(v) => void toggle({ push_enabled: v })}
-            />
+          <Space size={16} wrap>
+            {/* 一组 = 一段说明 + 它自己的开关，避免四件东西排成一行分不清谁管谁 */}
+            <Space size={8}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {schedule?.enabled
+                  ? `盘后 ${String(schedule.hour).padStart(2, '0')}:${String(
+                      schedule.minute,
+                    ).padStart(2, '0')} · 下次 ${rel(schedule.next_run, now)}`
+                  : '盘后不会自动抓数打分'}
+              </Text>
+              <Switch
+                checked={!!schedule?.enabled}
+                loading={toggling === 'jobs'}
+                checkedChildren="开"
+                unCheckedChildren="关"
+                onChange={(v) => void toggle({ enabled: v })}
+              />
+            </Space>
+            <Space size={8}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {schedule?.push_enabled
+                  ? `推送 ${String(schedule.push_hour ?? 14).padStart(2, '0')}:${String(
+                      schedule.push_minute ?? 50,
+                    ).padStart(2, '0')} · 下次 ${rel(schedule.next_push, now)}`
+                  : '不会自动推送估值'}
+              </Text>
+              <Switch
+                checked={!!schedule?.push_enabled}
+                loading={toggling === 'push'}
+                checkedChildren="开"
+                unCheckedChildren="关"
+                onChange={(v) => void toggle({ push_enabled: v })}
+              />
+            </Space>
           </Space>
         }
       >
-        <Space orientation="vertical" style={{ width: '100%' }} size={10}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
+        <Space orientation="vertical" style={{ width: '100%' }} size={12}>
+          <Text type="secondary">
             盘后任务：每个交易日收盘后自动抓取涨跌停池、板块资金流并重跑主力建仓打分（约
             12-15 分钟），非交易日自动跳过。关闭后需手动触发。
           </Text>
-          <Text type="secondary" style={{ fontSize: 13 }}>
+          <Text type="secondary">
             估值推送：交易日把每个订阅者关注基金的实时估值私发给他，每次发送都留痕
             （成没成与失败原因在「订阅管理」页可见）。盘中拿不到当日净值，推的是实时估值。
             没有订阅者、或他们都没关注基金时什么都不会发。两个开关互不影响 ——
@@ -503,7 +526,6 @@ export default function Jobs() {
       {/* ---- 跑完通知（飞书） -------------------------------------- */}
       <Card
         size="small"
-        style={{ marginTop: 12 }}
         title={
           <Space>
             <span>跑完通知（飞书）</span>
@@ -528,8 +550,8 @@ export default function Jobs() {
           </Space>
         }
       >
-        <Space orientation="vertical" style={{ width: '100%' }} size={10}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
+        <Space orientation="vertical" style={{ width: '100%' }} size={12}>
+          <Text type="secondary">
             每个交易日定时任务跑完后自动推一条到手机。正文按段拆开，下面勾中的才推；
             标题、任务状态（触发方式/结果/用时）与免责声明是消息框架，始终保留。
             手动「立即执行」与盘中轻量抓取不发送 —— 这个开关管的是自动推送，
@@ -538,7 +560,7 @@ export default function Jobs() {
           </Text>
 
           <div>
-            <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 6 }}>
+            <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
               推送内容（勾中的才发，改动即时保存）：
             </Text>
             <Checkbox.Group
@@ -614,7 +636,6 @@ export default function Jobs() {
       {/* ---- 飞书指令（入站长连接，手机遥控） ------------------------ */}
       <Card
         size="small"
-        style={{ marginTop: 12 }}
         title={
           <Space>
             <span>飞书指令（手机遥控）</span>
@@ -637,8 +658,8 @@ export default function Jobs() {
           </Space>
         }
       >
-        <Space orientation="vertical" style={{ width: '100%' }} size={10}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
+        <Space orientation="vertical" style={{ width: '100%' }} size={12}>
+          <Text type="secondary">
             在飞书里直接发文字遥控看板：跑 / 轻跑 / 关注 600825 / 取关 600825 /
             查询 600825 / 状态 / 摘要 / 候选 / 板块 / 关注列表。走企业自建应用的
             「事件订阅 → 长连接」，本机主动连出去，<b>不需要公网 IP、不用内网穿透</b>
@@ -647,7 +668,7 @@ export default function Jobs() {
           </Text>
 
           <Space wrap size={8}>
-            <Text style={{ fontSize: 13 }}>群里指令的回复方式</Text>
+            <Text strong>群里指令的回复方式</Text>
             <Segmented
               size="small"
               disabled={fSaving}
@@ -754,10 +775,11 @@ export default function Jobs() {
       </Card>
 
       {/* ---- 历史 ---------------------------------------------------- */}
-      <Card size="small" style={{ marginTop: 12 }} title="运行历史">
+      <Card size="small" title="运行历史">
         <Table<JobRun>
           rowKey="id"
           size="small"
+          scroll={{ x: 760 }}
           pagination={{ pageSize: 10, showSizeChanger: false }}
           columns={cols}
           dataSource={history}
@@ -768,10 +790,9 @@ export default function Jobs() {
       <Alert
         type="warning"
         showIcon
-        style={{ marginTop: 12 }}
         title="数据免责声明"
         description="任务抓取与统计的涨跌停池、板块资金流、主力建仓打分均来自公开接口，仅用于数据可视化研究，不提供投资建议，不构成任何买卖依据。"
       />
-    </Card>
+    </Space>
   )
 }
