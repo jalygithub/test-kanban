@@ -219,14 +219,19 @@ function PayOrdersCard() {
       width: 120,
       render: (_, r) =>
         r.status === 'pending' ? (
-          <Button
-            size="small"
-            type="primary"
-            loading={busy === r.order_no}
-            onClick={() => confirm(r.order_no)}
+          // 记账动作给一道确认：后端 409 挡的是**重复**确认，挡不住
+          // **确认错人** —— 点错了只能靠关订阅补救。
+          <Popconfirm
+            title="确认按这张订单开通？"
+            description={`${r.months} 个月 · ¥${r.amount}，到期顺延；开通后不可重复确认。`}
+            okText="确认开通"
+            cancelText="取消"
+            onConfirm={() => confirm(r.order_no)}
           >
-            确认开通
-          </Button>
+            <Button size="small" type="primary" loading={busy === r.order_no}>
+              确认开通
+            </Button>
+          </Popconfirm>
         ) : (
           <Text type="secondary">{r.confirmed_at ? short(r.confirmed_at) : '—'}</Text>
         ),
@@ -626,6 +631,12 @@ function InviteCard() {
       setErr('先填一个 open_id')
       return
     }
+    // 前端先挡一道：填错格式时链接已经生成也发不出去（「发给他」才在飞书侧
+    // 报错），后端同款 pattern 再挡一道。
+    if (!/^ou_[A-Za-z0-9_]+$/.test(oid)) {
+      setErr(`open_id 要以 ou_ 开头（形如 ou_xxxx…），收到「${oid}」`)
+      return
+    }
     setJoining(true)
     api
       .inviteJoin(oid, newNick.trim())
@@ -808,7 +819,11 @@ export default function Subs() {
   /** 正在操作的 open_id（行内按钮防连点）；'' = 没有在操作 */
   const [busy, setBusy] = useState('')
   const [pushing, setPushing] = useState(false)
-  const [pushMsg, setPushMsg] = useState('')
+  /** 推送回执带等级 —— 全失败时不能再套绿色 success（2026-11-13 review）。 */
+  const [pushMsg, setPushMsg] = useState<{
+    kind: 'success' | 'warning' | 'error'
+    text: string
+  } | null>(null)
   /**
    * **表格行内操作的回执，渲染在「订阅者」卡里**（不是上面那张卡）。
    *
@@ -884,7 +899,17 @@ export default function Subs() {
       .finally(() => setBusy(''))
   }
 
-  const activate = (openId: string, amount: number | null, nick: string) => {
+  /**
+   * 开通 / 续期。`sink` 给「表单在上方」的调用方：成功后清输入、失败把原因
+   * 留在**同一张卡**（`err`）；行内按钮没这个诉求，照旧走 `rowMsg`。
+   * 输入框**只在成功后才清** —— 先清再报错会把人刚填的内容弄丢。
+   */
+  const activate = (
+    openId: string,
+    amount: number | null,
+    nick: string,
+    sink?: { ok?: () => void; fail?: (msg: string) => void },
+  ) => {
     setBusy(openId)
     api
       .subActivate(openId, amount, nick)
@@ -894,9 +919,14 @@ export default function Subs() {
           kind: 'success',
           text: `已开通 / 续期，到期时间 ${short(r.item.expires_at)}。`,
         })
+        sink?.ok?.()
         load()
       })
-      .catch((e: unknown) => setRowMsg({ kind: 'error', text: errMsg(e) }))
+      .catch((e: unknown) => {
+        const m = errMsg(e)
+        if (sink?.fail) sink.fail(m)
+        else setRowMsg({ kind: 'error', text: m })
+      })
       .finally(() => setBusy(''))
   }
 
@@ -913,21 +943,30 @@ export default function Subs() {
       }
       amount = n
     }
-    activate(id, amount, newNick.trim())
-    setNewId('')
-    setNewAmount('')
-    setNewNick('')
-    setErr(null)
+    // 成功才清输入；失败原因留在上面这张卡（`err`），填的内容原样保留
+    activate(id, amount, newNick.trim(), {
+      ok: () => {
+        setNewId('')
+        setNewAmount('')
+        setNewNick('')
+        setErr(null)
+      },
+      fail: (m) => setErr(m),
+    })
   }
 
   const pushNow = () => {
     setPushing(true)
+    setPushMsg(null)
     api
       .subsPushNow()
       .then((r) => {
-        setPushMsg(
-          `已推 ${r.push.sent}/${r.push.targets} 人，失败 ${r.push.failed}。`,
-        )
+        const { sent, targets, failed } = r.push
+        setPushMsg({
+          // 一个都没发出去是 error、部分失败是 warning、全成才是 success
+          kind: failed === 0 ? 'success' : sent === 0 ? 'error' : 'warning',
+          text: `已推 ${sent}/${targets} 人，失败 ${failed}。`,
+        })
         setErr(null)
         reload()
       })
@@ -1076,14 +1115,21 @@ export default function Subs() {
                       <Button icon={<ReloadOutlined />} onClick={reload} loading={loading}>
                         刷新
                       </Button>
-                      <Button
-                        type="primary"
-                        icon={<SendOutlined />}
-                        loading={pushing}
-                        onClick={pushNow}
+                      <Popconfirm
+                        title="立刻推送一次？"
+                        description="给到点该收的订阅者发一次实时估值，不查交易日，点下去就发。"
+                        okText="推送"
+                        cancelText="取消"
+                        onConfirm={pushNow}
                       >
-                        立即推送
-                      </Button>
+                        <Button
+                          type="primary"
+                          icon={<SendOutlined />}
+                          loading={pushing}
+                        >
+                          立即推送
+                        </Button>
+                      </Popconfirm>
                     </Space>
                   }
                 >
@@ -1134,10 +1180,10 @@ export default function Subs() {
                   ) : null}
                   {pushMsg ? (
                     <Alert
-                      type="success"
+                      type={pushMsg.kind}
                       showIcon
                       title="推送结果"
-                      description={pushMsg}
+                      description={pushMsg.text}
                       style={{ marginTop: 12 }}
                     />
                   ) : null}

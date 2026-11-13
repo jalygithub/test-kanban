@@ -3,7 +3,7 @@ import {
   Alert,
   Button,
   Card,
-  Input,
+  DatePicker,
   Popconfirm,
   Progress,
   Select,
@@ -15,6 +15,8 @@ import {
   Typography,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+// 只要类型：DatePicker 的值是 antd 自带的 dayjs 实例，运行期不 import dayjs。
+import type { Dayjs } from 'dayjs'
 import { JobProgress } from '../components/JobProgress'
 import {
   api,
@@ -228,7 +230,7 @@ export default function DataManage() {
   // ---- 清理表单 --------------------------------------------------------
   const [ds, setDs] = useState('pool_dt')
   const [mode, setMode] = useState<'date' | 'before'>('date')
-  const [day, setDay] = useState('')
+  const [day, setDay] = useState<Dayjs | null>(null)
 
   /**
    * 首次加载。用 promise 链而不是 async/await：load 体内没有同步 setState，
@@ -252,7 +254,7 @@ export default function DataManage() {
 
   const datasets = usage?.datasets ?? []
   const logs = usage?.logs ?? []
-  const dayOk = /^\d{8}$/.test(day.trim())
+  const dayOk = day !== null
   // 不用 useMemo：datasets 是 usage?.datasets ?? []，依赖每轮渲染都换引用，
   // 算 8 个元素的 find 没必要 memo，挂上去反而触发 exhaustive-deps 告警
   const current = datasets.find((d) => d.dataset === ds)
@@ -288,7 +290,9 @@ export default function DataManage() {
   const purgeSnapshot = (dry: boolean) =>
     purge('snapshot', dry, {
       dataset: ds,
-      ...(mode === 'date' ? { date: day.trim() } : { before: day.trim() }),
+      ...(mode === 'date'
+        ? { date: day?.format('YYYYMMDD') ?? '' }
+        : { before: day?.format('YYYYMMDD') ?? '' }),
     })
 
   /** 清掉表单状态：换了对象或日期就得重新预览，否则确认按钮会拿着旧结果删。 */
@@ -313,12 +317,12 @@ export default function DataManage() {
   const [retryDomain, setRetryDomain] = useState('')
   const [jobBusy, setJobBusy] = useState(false)
   const [jobMsg, setJobMsg] = useState<string | null>(null)
-  const [jobDate, setJobDate] = useState('')
+  const [jobDate, setJobDate] = useState<Dayjs | null>(null)
 
   const [planDomain, setPlanDomain] = useState('daily_bar')
   const [planScope, setPlanScope] = useState<BarsScope>('all')
-  const [planStart, setPlanStart] = useState('')
-  const [planEnd, setPlanEnd] = useState('')
+  const [planStart, setPlanStart] = useState<Dayjs | null>(null)
+  const [planEnd, setPlanEnd] = useState<Dayjs | null>(null)
   const [plan, setPlan] = useState<BackfillPlan | null>(null)
   const [planBusy, setPlanBusy] = useState(false)
   const [planErr, setPlanErr] = useState<string | null>(null)
@@ -401,7 +405,7 @@ export default function DataManage() {
     setJobBusy(true)
     setJobMsg(null)
     api
-      .runJob(jobDate.trim() || undefined)
+      .runJob(jobDate ? jobDate.format('YYYYMMDD') : undefined)
       .then(() =>
         setJobMsg('已启动后台任务（含打分，约 12-15 分钟）。跑完再点刷新即可看到结果。'),
       )
@@ -414,7 +418,12 @@ export default function DataManage() {
    * 那样区间就永远是「起始日到起始日」）。
    */
   const loadPlan = () =>
-    api.backfillPlan(planDomain, planStart.trim(), planEnd.trim(), planScope)
+    api.backfillPlan(
+      planDomain,
+      planStart ? planStart.format('YYYYMMDD') : '',
+      planEnd ? planEnd.format('YYYYMMDD') : '',
+      planScope,
+    )
 
   /** 先看计划（零联网）——「要发多少请求」必须在动手之前就摆在眼前。 */
   const showPlan = () => {
@@ -766,7 +775,7 @@ export default function DataManage() {
           onClick={() => {
             setDs(r.dataset)
             setMode('date')
-            setDay('')
+            setDay(null)
             reset()
           }}
         >
@@ -938,13 +947,12 @@ export default function DataManage() {
               { value: 'before', label: '删这一天之前' },
             ]}
           />
-          <Input
+          <DatePicker
             style={{ width: 170 }}
-            placeholder="YYYYMMDD"
+            placeholder="选择日期"
             value={day}
-            maxLength={8}
-            onChange={(e) => {
-              setDay(e.target.value.replace(/\D/g, ''))
+            onChange={(d) => {
+              setDay(d)
               reset()
             }}
           />
@@ -1446,12 +1454,11 @@ export default function DataManage() {
           </Spin>
           <Space wrap size={12}>
             <Text type="secondary">指定日期补跑一轮完整盘后任务（含打分，约 12-15 分钟）：</Text>
-            <Input
+            <DatePicker
               style={{ width: 210 }}
-              placeholder="YYYYMMDD，留空 = 目标交易日"
+              placeholder="留空 = 目标交易日"
               value={jobDate}
-              maxLength={8}
-              onChange={(e) => setJobDate(e.target.value.replace(/\D/g, ''))}
+              onChange={(d) => setJobDate(d)}
             />
             <Button loading={jobBusy} onClick={runDatedJob}>
               跑这一轮
@@ -1489,19 +1496,17 @@ export default function DataManage() {
                 { value: 'wl', label: '名单：自选' },
               ]}
             />
-            <Input
+            <DatePicker
               style={{ width: 200 }}
-              placeholder="起始日 YYYYMMDD，留空 = 默认"
+              placeholder="起始日，留空 = 默认"
               value={planStart}
-              maxLength={8}
-              onChange={(e) => setPlanStart(e.target.value.replace(/\D/g, ''))}
+              onChange={(d) => setPlanStart(d)}
             />
-            <Input
+            <DatePicker
               style={{ width: 200 }}
-              placeholder="结束日 YYYYMMDD，留空 = 最新交易日"
+              placeholder="结束日，留空 = 最新交易日"
               value={planEnd}
-              maxLength={8}
-              onChange={(e) => setPlanEnd(e.target.value.replace(/\D/g, ''))}
+              onChange={(d) => setPlanEnd(d)}
             />
             <Button loading={planBusy} onClick={showPlan}>
               查看计划

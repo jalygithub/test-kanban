@@ -118,10 +118,16 @@ function cardLines(card: QuickCard | null) {
   const rows = els
     .filter((e) => e.tag === 'column_set')
     .map((e) => (e.columns ?? []).length)
+  // 行宽跟后端 `feishu.quick_card` 同口径：≥3 个按钮才 3 个一行（末行补空列），
+  // 不足 3 个整行占满（`full_grid` 分支）—— 写死「3 个」在只勾 1-2 条时会
+  // 显示出自相矛盾的预览（「按钮 2 个，排成一行 3 个」）。
+  const layout = btns.length >= 3 ? '排成一行 3 个' : '占满一整行'
   const head = [
     `schema: ${card.schema}`,
     `标题: ${card.header?.title?.content ?? '—'}`,
-    `按钮 ${btns.length} 个，排成一行 3 个（各行为 ${rows.join('/') || '—'} 个）:`,
+    btns.length
+      ? `按钮 ${btns.length} 个，${layout}（各行为 ${rows.join('/')} 个）:`
+      : '按钮 0 个:',
   ]
   const body = btns.map((b, i) => {
     const v = b.behaviors?.[0]?.value ?? {}

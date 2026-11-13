@@ -118,6 +118,9 @@ UNPATCHED = WsClient._handle_data_frame
 OWNER = "ou_ck_owner"
 CHAT = "oc_ck_chat"
 db.kv_set("feishu_owner", OWNER)
+# 回复方式 2026-11-13 起默认「私发」：本回归盯的是**卡片帧补丁**，下面那条
+# 「回复回原会话」断言按旧口径写，先把开关显式拨到 group（断言与计数不动）。
+db.kv_set("feishu_reply_mode", "group")
 
 # 一条**只回文案**的自定义指令：dispatch 全程不碰网络
 cmdcfg.save({"key": "ckcard", "kind": "custom", "text": "测速",

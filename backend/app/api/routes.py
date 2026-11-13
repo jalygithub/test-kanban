@@ -300,6 +300,10 @@ class FeishuBody(BaseModel):
     app_secret: str = Field("", description="企业自建应用 App Secret")
     owner: str = Field("", description="只响应这个发送人（open_id），留空=暂不响应")
     enabled: bool = Field(False, description="true=开长连接收消息")
+    reply_mode: Optional[str] = Field(
+        None, pattern="^(private|group)$",
+        description="群里指令回复方式：private=私发给发送人（默认）/ "
+                    "group=回原会话；不传=不改（防旧页面覆盖）")
 
 
 class FeishuSimBody(BaseModel):
@@ -315,9 +319,13 @@ def feishu_config() -> Dict[str, Any]:
 
 @router.post("/feishu/config")
 def feishu_config_set(body: FeishuBody) -> Dict[str, Any]:
-    """保存并立即生效：预检凭据 → 需要时重启长连接，不用重启后端。"""
+    """保存并立即生效：预检凭据 → 需要时重启长连接，不用重启后端。
+
+    `reply_mode` 不传 = 不动该开关（旧页面只发凭据四件套时不能把它抹回默认）。
+    """
     return {"feishu": feishu.set_config(
-        body.app_id, body.app_secret, body.owner, body.enabled)}
+        body.app_id, body.app_secret, body.owner, body.enabled,
+        reply_mode=body.reply_mode)}
 
 
 @router.post("/feishu/simulate")
@@ -701,8 +709,15 @@ class InviteMakeBody(BaseModel):
 
 
 class InviteJoinBody(BaseModel):
-    """手工把人加进名单。**不调任何飞书接口** —— 见 `invite_join`。"""
-    open_id: str = Field(..., min_length=1, description="要加进名单的人")
+    """手工把人加进名单。**不调任何飞书接口** —— 见 `invite_join`。
+
+    `pattern` 只挡「明显不是飞书 open_id」的输入（`ou_` 开头）—— 填错要到
+    「发给他」才在飞书侧失败，那时链接已经生成了。测试与长连接落库的都是
+    `ou_` 系，不会误伤。
+    """
+    open_id: str = Field(..., min_length=1, max_length=64,
+                         pattern=r"^ou_[A-Za-z0-9_]+$",
+                         description="要加进名单的人（飞书 open_id，ou_ 开头）")
     nickname: str = Field(default="", max_length=64, description="备注名，可空")
 
 
@@ -779,9 +794,11 @@ def invite_push(body: InvitePushBody) -> Dict[str, Any]:
     except invite.InviteError as exc:
         raise HTTPException(400, str(exc)) from exc
 
+    # Markdown 链接：`feishu.send_text` 认出 `[中文](url)` 会把整条升成富文本，
+    # 飞书里显示成中文锚点；裸 URL 在文本消息里只能显示成 URL 本身。
     text = (
         f"【A股看板】你的专属开通链接（点开即开通 {int(settings.pro_days)} 天，免费）：\n"
-        f"{link['url']}\n"
+        f"[点此打开邀请页]({link['url']})\n"
         f"一人一条，请勿转发；{int(settings.pro_days)} 天内有效。"
     )
     sent = feishu.send_text(body.open_id, text, id_type="open_id")

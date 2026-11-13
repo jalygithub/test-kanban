@@ -49,6 +49,9 @@ _APP_ID_KEY = "feishu_app_id"
 _APP_SECRET_KEY = "feishu_app_secret"
 _OWNER_KEY = "feishu_owner"
 _ENABLED_KEY = "feishu_inbound"
+#: 群里指令的回复方式（2026-11-13 用户定）：`private` = 私发给发送人本人的
+#: 单聊，不在群里刷屏（**默认**）；`group` = 照旧回原会话。存 kv，页面可切。
+_REPLY_MODE_KEY = "feishu_reply_mode"
 
 _API_BASE = "https://open.feishu.cn/open-apis"
 _TIMEOUT = (5.0, 10.0)      # (建连, 读回)
@@ -79,6 +82,23 @@ _ATE = re.compile(r"@_user_\d+|@_all")   # 群里 @机器人 留下的占位符
 # ------------------------------------------------------------------ 配置
 
 
+def reply_mode() -> str:
+    """群里指令的回复方式：`private`（默认，私发给发送人）/ `group`（回原会话）。
+
+    只认这两个值，库里的脏值一律回落 `private` —— 回复方式宁可保守（发私聊），
+    也不能因为一个拼错的开关把内容晒回群里。
+    """
+    return "group" if db.kv_get(_REPLY_MODE_KEY) == "group" else "private"
+
+
+def set_reply_mode(mode: str) -> str:
+    """改回复方式。非法值直接抛（`/feishu/config` 由 pydantic 先挡一道 422）。"""
+    if mode not in ("private", "group"):
+        raise ValueError(f"reply_mode 只能是 private / group，收到 {mode!r}")
+    db.kv_set(_REPLY_MODE_KEY, mode)
+    return mode
+
+
 def config() -> Dict[str, Any]:
     """给「定时任务」页：凭据、白名单、开关、连接状态。"""
     with _LOCK:
@@ -90,18 +110,26 @@ def config() -> Dict[str, Any]:
         "app_secret": app_secret,
         "owner": (db.kv_get(_OWNER_KEY) or "").strip(),
         "enabled": db.kv_get(_ENABLED_KEY) == "1",
+        "reply_mode": reply_mode(),
         "has_app": bool(app_id and app_secret),
         "state": state,
     }
 
 
 def set_config(app_id: str, app_secret: str, owner: str,
-               enabled: bool) -> Dict[str, Any]:
-    """保存并立即生效（预检凭据 → 需要时重启长连接），不用重启后端。"""
+               enabled: bool, reply_mode: Optional[str] = None
+               ) -> Dict[str, Any]:
+    """保存并立即生效（预检凭据 → 需要时重启长连接），不用重启后端。
+
+    :param reply_mode: ``None`` = **不动**这个开关。旧页面/旧调用方不带该
+                       字段，不能让一次凭据保存顺手把回复方式抹回默认。
+    """
     db.kv_set(_APP_ID_KEY, app_id.strip())
     db.kv_set(_APP_SECRET_KEY, app_secret.strip())
     db.kv_set(_OWNER_KEY, owner.strip())
     db.kv_set(_ENABLED_KEY, "1" if enabled else "0")
+    if reply_mode is not None:
+        set_reply_mode(reply_mode)
     with _LOCK:
         _STATE["last_error"] = ""     # 旧错误先清掉，由 start 重新判定
     start()
@@ -331,8 +359,35 @@ def _api_client() -> Any:
     return _CLIENT
 
 
+#: 回复文本里的 Markdown 链接 `[中文](url)`。只有写成这样的链接会被
+#: `send_text` 升级成飞书**富文本（post）里的中文锚点**；裸 URL 仍按纯文本发
+#: —— 文本消息里飞书只能把链接显示成 URL 本身，换不了字（2026-11-13 用户反馈）。
+_MD_LINK = re.compile(r"\[([^\]\n]+)\]\((https?://[^)\s]+)\)")
+
+
+def _post_body(text: str) -> Dict[str, Any]:
+    """把带 `[中文](url)` 的文本拼成飞书 post 消息体：**逐行成段**，行内按
+    链接切成 text / a 片段。空行给一个空格占位 —— 飞书不收空段。"""
+    lines: List[List[Dict[str, str]]] = []
+    for line in text.split("\n"):
+        segs: List[Dict[str, str]] = []
+        pos = 0
+        for m in _MD_LINK.finditer(line):
+            if m.start() > pos:
+                segs.append({"tag": "text", "text": line[pos:m.start()]})
+            segs.append({"tag": "a", "text": m.group(1), "href": m.group(2)})
+            pos = m.end()
+        if pos < len(line):
+            segs.append({"tag": "text", "text": line[pos:]})
+        lines.append(segs or [{"tag": "text", "text": " "}])
+    return {"zh_cn": {"title": "", "content": lines}}
+
+
 def send_text(chat_id: str, text: str, id_type: str = "chat_id") -> bool:
-    """以**应用**身份发一条文本。SDK 自己取并缓存 tenant_access_token。
+    """以**应用**身份发一条消息。SDK 自己取并缓存 tenant_access_token。
+
+    正文里写了 `[中文](url)` 就升级成**富文本（post）**，链接渲染成中文锚点；
+    没有这种链接就照旧发纯文本（`msg_type=text`）。
 
     :param id_type: ``chat_id``（群/会话）或 ``open_id``（某个人的单聊）
 
@@ -341,12 +396,15 @@ def send_text(chat_id: str, text: str, id_type: str = "chat_id") -> bool:
     """
     if not chat_id or not text:
         return False
+    rich = _MD_LINK.search(text) is not None
     try:
         from lark_oapi.api.im.v1 import (CreateMessageRequest,
                                           CreateMessageRequestBody)
         body = (CreateMessageRequestBody.builder()
-                .receive_id(chat_id).msg_type("text")
-                .content(json.dumps({"text": text}, ensure_ascii=False))
+                .receive_id(chat_id)
+                .msg_type("post" if rich else "text")
+                .content(json.dumps(_post_body(text) if rich else {"text": text},
+                                    ensure_ascii=False))
                 .build())
         req = (CreateMessageRequest.builder().receive_id_type(id_type)
                .request_body(body).build())
@@ -611,23 +669,40 @@ def _on_card_action(data: Any) -> Any:
     return _toast("success", f"已发送：{row.get('label') or key}")
 
 
-def _send_reply(chat_id: str, reply: Union[str, Dict[str, Any]]) -> bool:
+def _reply_target(sender_id: str, chat_id: Optional[str]) -> Tuple[str, str]:
+    """按当前回复方式算回复目标，返回 ``(目标 id, id_type)``。
+
+    `private`（默认）→ 发给**发送人本人**的单聊（``open_id``）：群里发指令、
+    @机器人、点卡片按钮都不在群里刷屏；发送人拿不到时才退回原会话。
+    `group` → 原样回原会话（``chat_id``，旧行为）。
+    单聊里两种模式效果相同（那个人的 open_id 单聊就是这个会话）。
+    """
+    if reply_mode() == "private" and sender_id:
+        return sender_id, "open_id"
+    return chat_id or "", "chat_id"
+
+
+def _send_reply(target: str, reply: Union[str, Dict[str, Any]],
+                id_type: str = "chat_id") -> bool:
     """把 `dispatch` 的回复发出去：**字符串走文本、字典走卡片**。
 
     分流只放这一处 —— 长连接与卡片回调两条入口都走它，不会出现「一条能发
     卡片、另一条把卡片当文本发出去」的漏改。
     """
     if isinstance(reply, dict):
-        return send_card(chat_id, reply)
-    return send_text(chat_id, reply)
+        return send_card(target, reply, id_type=id_type)
+    return send_text(target, reply, id_type)
 
 
 def _card_run(text: str, sender: str, chat: str, key: str) -> None:
-    """后台执行一条被点中的指令，把回复发回原会话。"""
+    """后台执行一条被点中的指令，把回复发到**按回复方式算出的目标**。"""
     try:
         reply = dispatch(text, sender, chat_id=chat)
-        if reply and not _send_reply(chat, reply):
-            logger.warning("卡片指令 %s 的回复没发出去", key)
+        target, id_type = _reply_target(sender, chat)
+        if reply and not _send_reply(target, reply, id_type):
+            # 私发失败**不回退群里**：回退会把只该给发送人的内容晒到群里
+            logger.warning("卡片指令 %s 的回复没发出去（%s=%s）",
+                           key, id_type, target)
     except Exception:  # noqa: BLE001
         logger.exception("卡片指令 %s 执行失败", key)
 
@@ -724,12 +799,15 @@ def _handle_event(data: Any, gen: int) -> None:
         sender_type = getattr(sender, "sender_type", "") or ""
         if sender_type and sender_type != "user":
             return                          # 机器人/应用自己发的，防回环
+        sender_id = _sender_id(sender)
+        # 回复目标只在这里算一次：私发开关对「非文字提示」与「正式回复」两条
+        # 出口一致生效，不会出现一条私发、另一条回群。
+        target, id_type = _reply_target(sender_id, msg.chat_id)
         if (msg.message_type or "text") != "text":
-            send_text(msg.chat_id, "我只认文字指令，发「帮助」看用法。")
+            send_text(target, "我只认文字指令，发「帮助」看用法。", id_type)
             return
 
         text = _clean(_text_of(msg.content))
-        sender_id = _sender_id(sender)
         # 谁发过消息谁进名单（`plan=''` = 在名单里、还没订阅）。这是邀请链接
         # **唯一**的 bootstrap：没有这一步名单永远是空的，一条邀请链接也生成
         # 不出来 —— `invite.make_link` 得先知道给谁。
@@ -739,8 +817,11 @@ def _handle_event(data: Any, gen: int) -> None:
         if sender_id:
             db.sub_upsert(sender_id)
         reply = dispatch(text, sender_id, chat_id=msg.chat_id)
-        if reply:
-            _send_reply(msg.chat_id, reply)
+        if reply and not _send_reply(target, reply, id_type):
+            # 私发失败**不回退群里**（隐私优先），只记日志 —— 回退会把只该
+            # 给发送人的内容晒到整个群。
+            logger.warning("回复没发出去（%s=%s），不回退到原会话",
+                           id_type, target)
     except Exception:  # noqa: BLE001
         logger.exception("处理飞书消息失败")
 
@@ -978,9 +1059,9 @@ def _execute(cmd: str, args: tuple, sender_id: str,
 
     # ---- 以下与旧版一致（owner 专用）----
     if cmd == "run":
-        return _cmd_run(chat_id, allow)
+        return _cmd_run(chat_id, allow, sender_id)
     if cmd == "light":
-        return _cmd_light(chat_id, allow)
+        return _cmd_light(chat_id, allow, sender_id)
     if cmd == "status":
         return _cmd_status()
     if cmd == "digest":
@@ -1088,7 +1169,8 @@ def _cmd_block(factory: Callable[[], List[str]]) -> str:
 # ------------------------------------------------------------ 有副作用的
 
 
-def _cmd_run(chat_id: Optional[str], allow: bool) -> str:
+def _cmd_run(chat_id: Optional[str], allow: bool,
+             sender_id: str = "") -> str:
     if scheduler.state()["running"]:
         st = scheduler.state()
         return (f"已有一轮盘后任务在进行中（{st.get('kind', '')} · "
@@ -1102,8 +1184,12 @@ def _cmd_run(chat_id: Optional[str], allow: bool) -> str:
             scheduler.run_post_close(kind="feishu")
         except Exception as exc:  # noqa: BLE001
             logger.exception("飞书触发的盘后任务失败")
-            if chat_id:
-                send_text(chat_id, f"盘后任务失败：{type(exc).__name__}: {exc}")
+            # 异步回执也守回复方式：群里触发的失败**私发给发起人**，不回群里。
+            # 发送失败不回退群里（隐私优先），send_text 内部已记日志。
+            target, id_type = _reply_target(sender_id, chat_id)
+            if target:
+                send_text(target, f"盘后任务失败：{type(exc).__name__}: {exc}",
+                          id_type)
 
     threading.Thread(target=_worker, name="post-close-feishu",
                      daemon=True).start()
@@ -1111,26 +1197,30 @@ def _cmd_run(chat_id: Optional[str], allow: bool) -> str:
             "跑完会自动把摘要推到这个会话。")
 
 
-def _cmd_light(chat_id: Optional[str], allow: bool) -> str:
+def _cmd_light(chat_id: Optional[str], allow: bool,
+               sender_id: str = "") -> str:
     if not allow:
         return ("（试一下）会启动轻量抓取：涨跌停池 + 板块资金流，几十秒，"
                 "完成后我再单独报一次结果。")
 
     def _worker() -> None:
+        # 同 `_cmd_run`：异步回执按回复方式走，群里触发也私发给发起人。
+        target, id_type = _reply_target(sender_id, chat_id)
         try:
             out = scheduler.run_light(kind="feishu")
         except Exception as exc:  # noqa: BLE001
             logger.exception("飞书触发的轻量抓取失败")
-            if chat_id:
-                send_text(chat_id, f"轻量抓取失败：{type(exc).__name__}: {exc}")
+            if target:
+                send_text(target, f"轻量抓取失败：{type(exc).__name__}: {exc}",
+                          id_type)
             return
         steps = " · ".join(f"{k} {v}" for k, v in
                            (out.get("results") or {}).items())
         txt = f"轻量抓取完成（{notify.STATUS_LABEL.get(out.get('status'), out.get('status'))} · {out.get('date')}）\n{steps}"
         if out.get("failed"):
             txt += "\n失败：" + "、".join(out["failed"])
-        if chat_id:
-            send_text(chat_id, txt)
+        if target:
+            send_text(target, txt, id_type)
 
     threading.Thread(target=_worker, name="light-feishu",
                      daemon=True).start()

@@ -121,7 +121,9 @@ def cmd_subscribe(open_id: str, nickname: str = "") -> str:
     lines = [
         "订阅 Pro",
         "",
-        link["url"],
+        # Markdown 链接：`send_text` 认出它就把消息升成富文本，飞书里显示成
+        # 中文锚点（裸 URL 在文本消息里只能显示成 URL 本身）。
+        f"[点此打开收银台]({link['url']})",
         "",
         "打开链接选月份与支付方式：",
     ]

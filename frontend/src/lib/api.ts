@@ -941,6 +941,8 @@ export interface FeishuConfig {
   app_secret: string
   owner: string
   enabled: boolean
+  /** 群里指令的回复方式：private=私发给发送人（默认）/ group=回原会话 */
+  reply_mode: 'private' | 'group'
   has_app: boolean
   state: FeishuState
 }
@@ -2236,6 +2238,8 @@ export const api = {
     app_secret: string
     owner: string
     enabled: boolean
+    /** 不传 = 后端不动这个开关（防只发凭据的调用方把它抹回默认） */
+    reply_mode?: 'private' | 'group'
   }) =>
     request<{ feishu: FeishuConfig }>('/api/feishu/config', {
       method: 'POST',

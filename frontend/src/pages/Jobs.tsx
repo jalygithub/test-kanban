@@ -6,6 +6,7 @@ import {
   Checkbox,
   Input,
   Popconfirm,
+  Segmented,
   Space,
   Switch,
   Table,
@@ -251,15 +252,20 @@ export default function Jobs() {
     }
   }
 
-  /** 保存入站凭据与白名单。`next` 来自开关，省得开一下关又得重读输入框。 */
-  const saveFeishu = async (next?: boolean) => {
+  /** 保存入站凭据与白名单。`patch` 来自开关/回复方式切换，省得改一项又得
+   *  重读输入框；没给的字段沿用页面当前值（enabled / reply_mode 同理）。 */
+  const saveFeishu = async (patch?: {
+    enabled?: boolean
+    reply_mode?: 'private' | 'group'
+  }) => {
     setFSaving(true)
     try {
       const r = await api.saveFeishu({
         app_id: fAppId.trim(),
         app_secret: fSecret.trim(),
         owner: fOwner.trim(),
-        enabled: next ?? !!feishu?.enabled,
+        enabled: patch?.enabled ?? !!feishu?.enabled,
+        reply_mode: patch?.reply_mode ?? feishu?.reply_mode ?? 'private',
       })
       setFeishu(r.feishu)
       setFAppId(r.feishu.app_id)
@@ -626,7 +632,7 @@ export default function Jobs() {
               checkedChildren="开"
               unCheckedChildren="关"
               disabled={!fAppId.trim() || !fSecret.trim()}
-              onChange={(v) => void saveFeishu(v)}
+              onChange={(v) => void saveFeishu({ enabled: v })}
             />
           </Space>
         }
@@ -638,6 +644,27 @@ export default function Jobs() {
             「事件订阅 → 长连接」，本机主动连出去，<b>不需要公网 IP、不用内网穿透</b>
             （以后把项目扔到服务器上同样能收）。只有白名单里的 open_id 发的才执行，
             群里别人喊「跑」一律拒绝；「跑」跑完会把摘要推回这个会话。
+          </Text>
+
+          <Space wrap size={8}>
+            <Text style={{ fontSize: 13 }}>群里指令的回复方式</Text>
+            <Segmented
+              size="small"
+              disabled={fSaving}
+              value={feishu?.reply_mode === 'group' ? 'group' : 'private'}
+              options={[
+                { label: '私发给发送人（默认）', value: 'private' },
+                { label: '回原会话', value: 'group' },
+              ]}
+              onChange={(v) =>
+                void saveFeishu({ reply_mode: v as 'private' | 'group' })
+              }
+            />
+          </Space>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            私发：在群里发指令或 @机器人，回复只发到发送人本人的单聊，不在群里
+            刷屏；发送失败只记后端日志，<b>不会</b>改发到群里。回原会话：机器人
+            直接在收到指令的那个会话里回（旧行为）。
           </Text>
 
           <Space wrap>
