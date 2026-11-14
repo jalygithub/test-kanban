@@ -61,3 +61,274 @@
   0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.18it/s]                                             回填日线 001399 第 1 次失败（ConnectionError），1.7s 后重试
 回填日线 001399 第 2 次失败（ConnectionError），2.8s 后重试
 取数失败 回填日线 001399                        7.47s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+[12:26:42] 开跑：预算 600 分钟，区间 20260105..20261112
+[12:26:42] 开跑：预算 600 分钟，区间 20260105..20261112
+[12:26:45] 名单 5224 只
+[12:26:45] 名单 5224 只
+[12:26:48] bars：名单 5224 只，待跑 4423 只（已覆盖 801 跳过）
+[12:26:48] bars：名单 5224 只，待跑 4423 只（已覆盖 801 跳过）
+回填日线 000831 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 000831 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 000831                        5.74s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.47it/s]                                             回填日线 001220 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 001220 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 001220                        6.35s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.74it/s]                                             回填日线 001232 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 001232 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 001232                        7.99s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.03s/it]                                             回填日线 001237 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 001237 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001237                        6.72s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.92it/s]                                             回填日线 001246 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 001246 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001246                        9.06s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.80s/it]                                             回填日线 001248 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 001248 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 001248                        5.83s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.34it/s]                                             回填日线 001257 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 001257 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 001257                        8.16s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.50it/s]                                             回填日线 001312 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 001312 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 001312                        7.19s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.06it/s]                                             回填日线 001331 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 001331 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001331                        7.26s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.27s/it]                                             回填日线 001365 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 001365 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001365                        6.58s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.61it/s]                                             回填日线 001381 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 001381 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 001381                        7.63s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.39it/s]                                             回填日线 001393 第 1 次失败（ConnectionError），1.8s 后重试
+回填日线 001393 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 001393                        6.41s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.34it/s]                                             回填日线 001399 第 1 次失败（ConnectionError），1.8s 后重试
+回填日线 001399 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 001399                        6.69s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.63it/s]                                             回填日线 002049 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002049 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002049                        6.79s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.06it/s]                                             回填日线 002055 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002055 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002055                        5.89s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.11it/s]                                             回填日线 002129 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002129 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002129                        6.15s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.20it/s]                                             回填日线 002145 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002145 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 002145                        7.60s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.58it/s]                                             回填日线 002146 第 1 次失败（ConnectionError），1.8s 后重试
+回填日线 002146 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002146                        7.03s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.67it/s]                                             回填日线 002148 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002148 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002148                        8.14s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.64it/s]                                             回填日线 002149 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002149 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002149                        6.17s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.11s/it]                                             回填日线 002152 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002152 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002152                        6.04s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.05it/s]                                             回填日线 002157 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002157 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002157                        5.40s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.54s/it]                                             回填日线 002158 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002158 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002158                        6.34s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.08it/s]                                             回填日线 002161 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002161 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002161                        6.43s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.22it/s]                                             回填日线 002162 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002162 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002162                        7.35s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.79it/s]                                             [12:31:12] bars 250/4423 只 · 累计 204 行 · 5min
+[12:31:12] bars 250/4423 只 · 累计 204 行 · 5min
+回填日线 002164 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002164 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 002164                        5.74s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.38it/s]                                             回填日线 002165 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002165 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 002165                        6.72s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.33it/s]                                             回填日线 002166 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002166 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 002166                        5.77s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.24it/s]                                             回填日线 002168 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002168 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002168                        6.73s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.14it/s]                                             回填日线 002169 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002169 第 2 次失败（ConnectionError），2.8s 后重试
+取数失败 回填日线 002169                        6.52s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.37it/s]                                             回填日线 002173 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002173 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002173                        6.94s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.02it/s]                                             回填日线 002174 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002174 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002174                        6.99s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.55it/s]                                             回填日线 002176 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002176 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002176                        6.97s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.25it/s]                                             回填日线 002179 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002179 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002179                        6.30s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.24it/s]                                             回填日线 002180 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002180 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002180                        5.80s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.67it/s]                                             回填日线 002181 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002181 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002181                        6.34s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.80it/s]                                             回填日线 002185 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002185 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002185                        5.89s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.52it/s]                                             回填日线 002189 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002189 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002189                        9.02s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.50it/s]                                             回填日线 002190 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002190 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002190                        5.47s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.79it/s]                                             回填日线 002191 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002191 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002191                        5.64s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.39it/s]                                             回填日线 002192 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002192 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002192                        7.06s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.19it/s]                                             回填日线 002194 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002194 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002194                        6.05s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.88it/s]                                             回填日线 002196 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002196 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002196                        7.12s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.12it/s]                                             回填日线 002197 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002197 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 002197                        6.06s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.64it/s]                                             回填日线 002199 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002199 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002199                        6.59s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.29it/s]                                             回填日线 002200 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002200 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002200                        5.56s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.94it/s]                                             回填日线 002201 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002201 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002201                        6.85s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.27it/s]                                             回填日线 002202 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002202 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002202                        6.06s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.10s/it]                                             回填日线 002206 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002206 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002206                        7.88s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.49it/s]                                             回填日线 002208 第 1 次失败（ConnectionError），1.8s 后重试
+回填日线 002208 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 002208                        6.67s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.03it/s]                                             [12:35:06] bars 275/4423 只 · 累计 229 行 · 8min
+[12:35:06] bars 275/4423 只 · 累计 229 行 · 8min
+回填日线 002210 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002210 第 2 次失败（ConnectionError），2.8s 后重试
+取数失败 回填日线 002210                        5.67s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.02s/it]                                             回填日线 002211 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002211 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002211                        6.56s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.78it/s]                                             回填日线 002215 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002215 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 002215                        6.92s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.74it/s]                                             回填日线 002216 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002216 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 002216                        6.40s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.12s/it]                                             回填日线 002218 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002218 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002218                        6.12s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.32it/s]                                             回填日线 002219 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002219 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002219                        6.59s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.01s/it]                                             回填日线 002221 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002221 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002221                        7.03s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.98s/it]                                             回填日线 002224 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 002224 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002224                        6.20s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.50it/s]                                             回填日线 002225 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002225 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002225                        6.92s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.21it/s]                                             回填日线 002226 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002226 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002226                        7.14s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.16it/s]                                             回填日线 002229 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002229 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002229                        6.42s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.31it/s]                                             回填日线 002230 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002230 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002230                        7.94s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.56s/it]                                             回填日线 002233 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002233 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002233                        6.44s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.06it/s]                                             回填日线 002234 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002234 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 002234                        7.19s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.84it/s]                                             回填日线 002235 第 1 次失败（ConnectionError），1.6s 后重试
+[12:46:54] 开跑：预算 600 分钟，区间 20260105..20261112
+[12:46:54] 开跑：预算 600 分钟，区间 20260105..20261112
+[12:46:57] 名单 5224 只
+[12:46:57] 名单 5224 只
+[12:46:59] bars：名单 5224 只，待跑 4375 只（已覆盖 849 跳过）
+[12:46:59] bars：名单 5224 只，待跑 4375 只（已覆盖 849 跳过）
+回填日线 000831 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 000831 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 000831                        6.14s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  3.12it/s]                                             回填日线 001220 第 1 次失败（ConnectionError），1.7s 后重试
+回填日线 001220 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 001220                        7.41s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.02s/it]                                             回填日线 001232 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 001232 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001232                        7.99s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.47it/s]                                             回填日线 001237 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 001237 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001237                        6.98s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.49it/s]                                             回填日线 001246 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 001246 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 001246                        6.95s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.47it/s]                                             回填日线 001248 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 001248 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001248                        7.94s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.83it/s]                                             回填日线 001257 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 001257 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 001257                        7.04s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  3.87it/s]                                             回填日线 001312 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 001312 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001312                        5.95s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.52it/s]                                             回填日线 001331 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 001331 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001331                        7.80s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.77it/s]                                             回填日线 001365 第 1 次失败（ConnectionError），1.8s 后重试
+回填日线 001365 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 001365                        7.21s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.04it/s]                                             回填日线 001381 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 001381 第 2 次失败（ConnectionError），2.4s 后重试
+取数失败 回填日线 001381                        7.32s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.48it/s]                                             回填日线 001393 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 001393 第 2 次失败（ConnectionError），2.8s 后重试
+取数失败 回填日线 001393                        7.19s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  3.02it/s]                                             回填日线 001399 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 001399 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 001399                        6.41s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.62it/s]                                             回填日线 002049 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002049 第 2 次失败（ConnectionError），2.5s 后重试
+取数失败 回填日线 002049                        6.24s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.59it/s]                                             回填日线 002055 第 1 次失败（ConnectionError），1.5s 后重试
+回填日线 002055 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002055                        7.78s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.39it/s]                                             回填日线 002129 第 1 次失败（ConnectionError），1.3s 后重试
+回填日线 002129 第 2 次失败（ConnectionError），2.6s 后重试
+取数失败 回填日线 002129                        6.99s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:01<00:00,  1.58s/it]                                             回填日线 002235 第 1 次失败（ConnectionError），1.2s 后重试
+回填日线 002235 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002235                        4.36s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  2.74it/s]                                             回填日线 002238 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002238 第 2 次失败（ConnectionError），2.2s 后重试
+取数失败 回填日线 002238                        7.06s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.00it/s]                                             回填日线 002239 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002239 第 2 次失败（ConnectionError），2.3s 后重试
+取数失败 回填日线 002239                        6.64s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.49it/s]                                             回填日线 002240 第 1 次失败（ConnectionError），1.4s 后重试
+回填日线 002240 第 2 次失败（ConnectionError），2.7s 后重试
+取数失败 回填日线 002240                        6.58s ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00,  1.81it/s]                                             回填日线 002242 第 1 次失败（ConnectionError），1.6s 后重试
+回填日线 002242 第 2 次失败（ConnectionError），2.4s 后重试
